@@ -58,7 +58,7 @@ async function loadPlaylist() {
                 tvgId,
                 tvgName,
                 group,
-                logo
+                logo: logo || "https://placehold.co/300x300?text=TV"
             };
 
         } else if (
@@ -173,14 +173,22 @@ app.get("/groups", async (req, res) => {
 
 });
 
-app.get("/group/:name", async (req, res) => {
+app.get("/groups", async (req, res) => {
 
     const data = await loadPlaylist();
 
-    const result = data.filter(item =>
-        item.group.toLowerCase() === req.params.name.toLowerCase()
-    );
+    const groups = {};
 
+    data.forEach(item => {
+        if (!groups[item.group]) {
+            groups[item.group] = 0;
+        }
+        groups[item.group]++;
+    });
+
+    res.json(groups);
+
+});
     res.json({
         status: true,
         total: result.length,
@@ -214,6 +222,13 @@ app.get("/random", async (req, res) => {
     const item = data[Math.floor(Math.random() * data.length)];
 
     res.json(item);
+
+});
+app.get("/recent", async (req, res) => {
+
+    const data = await loadPlaylist();
+
+    res.json(data.slice(-20).reverse());
 
 });
 
