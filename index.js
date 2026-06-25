@@ -1,4 +1,4 @@
-const API_KEY = "MOVEXA_2026_SECRET";
+const API_KEY = process.env.API_KEY;
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
