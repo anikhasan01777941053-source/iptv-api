@@ -167,16 +167,6 @@ app.get("/groups", async (req, res) => {
 
     const data = await loadPlaylist();
 
-    const groups = [...new Set(data.map(x => x.group).filter(Boolean))];
-
-    res.json(groups);
-
-});
-
-app.get("/groups", async (req, res) => {
-
-    const data = await loadPlaylist();
-
     const groups = {};
 
     data.forEach(item => {
@@ -189,11 +179,21 @@ app.get("/groups", async (req, res) => {
     res.json(groups);
 
 });
+    app.get("/group/:name", async (req, res) => {
+
+    const data = await loadPlaylist();
+
+    const result = data.filter(item =>
+        item.group.toLowerCase() === req.params.name.toLowerCase()
+    );
+
     res.json({
         status: true,
         total: result.length,
         channels: result
     });
+
+});
 
 });
 app.get("/stats", async (req, res) => {
