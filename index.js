@@ -195,7 +195,6 @@ app.get("/groups", async (req, res) => {
 
 });
 
-});
 app.get("/stats", async (req, res) => {
 
     const data = await loadPlaylist();
