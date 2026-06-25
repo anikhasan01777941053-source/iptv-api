@@ -102,10 +102,28 @@ app.get("/playlist", async (req, res) => {
 
     const data = await loadPlaylist();
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    const result = data.slice(start, end);
+
     res.json({
+
         status: true,
+
         total: data.length,
-        channels: data
+
+        page: page,
+
+        limit: limit,
+
+        totalPages: Math.ceil(data.length / limit),
+
+        channels: result
+
     });
 
 });
@@ -168,6 +186,34 @@ app.get("/group/:name", async (req, res) => {
         total: result.length,
         channels: result
     });
+
+});
+app.get("/stats", async (req, res) => {
+
+    const data = await loadPlaylist();
+
+    const groups = [...new Set(data.map(x => x.group))];
+
+    res.json({
+
+        status: true,
+
+        channels: data.length,
+
+        groups: groups.length,
+
+        cache: new Date(lastUpdate).toISOString()
+
+    });
+
+});
+app.get("/random", async (req, res) => {
+
+    const data = await loadPlaylist();
+
+    const item = data[Math.floor(Math.random() * data.length)];
+
+    res.json(item);
 
 });
 
