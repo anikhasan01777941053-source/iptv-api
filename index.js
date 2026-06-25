@@ -1,3 +1,4 @@
+const API_KEY = "MOVEXA_2026_SECRET";
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
@@ -5,6 +6,21 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
+
+app.use((req, res, next) => {
+
+    const apiKey = req.headers["x-api-key"];
+
+    if (apiKey !== API_KEY) {
+        return res.status(401).json({
+            status: false,
+            message: "Unauthorized"
+        });
+    }
+
+    next();
+
+});
 
 const PLAYLIST_URL = "https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u";
 
