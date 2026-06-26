@@ -1,12 +1,71 @@
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET;
+const APP_SECRET = process.env.APP_SECRET;
 const API_KEY = process.env.API_KEY;
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 
 const app = express();
-
 app.use(cors());
+app.use(express.json());
+function verifyToken(req, res, next) {
 
+    const auth = req.headers.authorization;
+
+    if (!auth) {
+        return res.status(401).json({
+            status: false,
+            message: "Token Missing"
+        });
+    }
+
+    const token = auth.replace("Bearer ", "");
+
+    try {
+
+        jwt.verify(token, JWT_SECRET);
+
+        next();
+
+    } catch (e) {
+
+        return res.status(401).json({
+            status: false,
+            message: "Invalid Token"
+        });
+
+    }
+
+}
+app.post("/auth", (req, res) => {
+
+    const appSecret = req.headers["x-app-secret"];
+    const deviceId = req.headers["x-device-id"];
+
+    if (appSecret !== APP_SECRET) {
+        return res.status(401).json({
+            status: false,
+            message: "Unauthorized"
+        });
+    }
+
+    const token = jwt.sign(
+        {
+            device: deviceId
+        },
+        JWT_SECRET,
+        {
+            expiresIn: "1h"
+        }
+    );
+
+    res.json({
+        status: true,
+        token: token
+    });
+
+});
 app.use((req, res, next) => {
 
     const apiKey = req.headers["x-api-key"];
@@ -114,7 +173,7 @@ app.get("/", async (req, res) => {
 
 });
 
-app.get("/playlist", async (req, res) => {
+app.get("/playlist", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
@@ -127,19 +186,12 @@ app.get("/playlist", async (req, res) => {
     const result = data.slice(start, end);
 
     res.json({
-
         status: true,
-
         total: data.length,
-
         page: page,
-
         limit: limit,
-
         totalPages: Math.ceil(data.length / limit),
-
         channels: result
-
     });
 
 });
