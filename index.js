@@ -196,7 +196,7 @@ app.get("/playlist", verifyToken, async (req, res) => {
 
 });
 
-app.get("/channel/:id", async (req, res) => {
+app.get("/channel/:id", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
@@ -212,8 +212,7 @@ app.get("/channel/:id", async (req, res) => {
     res.json(item);
 
 });
-
-app.get("/search", async (req, res) => {
+app.get("/search", verifyToken, async (req, res) => {
 
     const keyword = (req.query.q || "").toLowerCase();
 
@@ -230,24 +229,26 @@ app.get("/search", async (req, res) => {
     });
 
 });
-
-app.get("/groups", async (req, res) => {
+app.get("/groups", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
     const groups = {};
 
     data.forEach(item => {
+
         if (!groups[item.group]) {
             groups[item.group] = 0;
         }
+
         groups[item.group]++;
+
     });
 
     res.json(groups);
 
 });
-    app.get("/group/:name", async (req, res) => {
+    app.get("/group/:name", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
@@ -263,26 +264,21 @@ app.get("/groups", async (req, res) => {
 
 });
 
-app.get("/stats", async (req, res) => {
+app.get("/stats", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
     const groups = [...new Set(data.map(x => x.group))];
 
     res.json({
-
         status: true,
-
         channels: data.length,
-
         groups: groups.length,
-
         cache: new Date(lastUpdate).toISOString()
-
     });
 
 });
-app.get("/random", async (req, res) => {
+app.get("/random", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
@@ -291,14 +287,13 @@ app.get("/random", async (req, res) => {
     res.json(item);
 
 });
-app.get("/recent", async (req, res) => {
+app.get("/recent", verifyToken, async (req, res) => {
 
     const data = await loadPlaylist();
 
     res.json(data.slice(-20).reverse());
 
 });
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
