@@ -83,6 +83,9 @@ app.use((req, res, next) => {
 
 const PLAYLIST_URL = "https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u";
 
+const JSON_URL =
+"https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/Channels_data.json";
+
 let channels = [];
 let lastUpdate = 0;
 const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
@@ -94,7 +97,10 @@ async function loadPlaylist() {
         return channels;
     }
 
-    const response = await axios.get(PLAYLIST_URL);
+    const [response, jsonResponse] = await Promise.all([
+    axios.get(PLAYLIST_URL),
+    axios.get(JSON_URL)
+]);
 
     const lines = response.data.split(/\r?\n/);
 
@@ -148,6 +154,40 @@ async function loadPlaylist() {
             current = null;
         }
     }
+    const jsonChannels = jsonResponse.data.channels || [];
+
+jsonChannels.forEach(item => {
+
+    const exists = list.find(channel =>
+
+        channel.name.trim().toLowerCase() ===
+        item.name.trim().toLowerCase()
+
+    );
+
+    if (!exists) {
+
+        list.push({
+
+            id: list.length + 1,
+
+            name: item.name,
+
+            tvgId: "",
+
+            tvgName: item.name,
+
+            group: "Other",
+
+            logo: "https://placehold.co/300x300?text=TV",
+
+            url: item.url
+
+        });
+
+    }
+
+});
 
     channels = list;
     lastUpdate = now;
